@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="libreria-mode" content="github">
+<meta name="libreria-version" content="17/10/2026 · n. 5">
 <meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1219" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -126,6 +127,9 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .savestate{font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.04em}
 .ghhelp{font-size:.88rem;color:var(--muted);margin:0}
 .ghhelp a{color:var(--accent)}
+.ghver{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;margin-top:-6px;font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
+.ghver button{font:inherit;color:var(--accent);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.ghver button:disabled{color:var(--muted);cursor:default;text-decoration:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .imp-list{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin:0;padding:6px 0;list-style:none;font-size:.9rem}
 .imp-list li{display:flex;gap:10px;align-items:center;padding:4px 12px}
@@ -355,6 +359,7 @@ form.ed{padding:20px;display:grid;gap:18px}
         <p class="hint">Crealo su <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="color:var(--accent)">GitHub → Fine-grained token</a>: accesso solo a questo repository, permessi Contents e Actions in lettura e scrittura.</p></div>
       <div class="err" id="ghErr" role="alert"></div>
       <div class="edfoot"><button class="btn danger ghost" type="button" id="ghLogout" hidden>Scollega questo dispositivo</button><button class="btn primary" type="submit" id="ghGo">Collega</button></div>
+      <div class="ghver" id="ghVer" hidden><span id="ghVerTxt"></span><button type="button" id="ghUpd">Controlla aggiornamenti</button></div>
     </form>
   </div>
 </div>
@@ -1119,10 +1124,27 @@ function openSetup(msg){
   $("#gh-token").value = "";
   $("#ghErr").textContent = ""; ghAllowPublic = false; $("#ghGo").textContent = "Collega";
   $("#ghLogout").hidden = !Gh.configured(); $("#ghX").hidden = !Gh.configured();
+  const ver = (document.querySelector('meta[name="libreria-version"]')||{}).content || "";
+  $("#ghVer").hidden = !ver; $("#ghVerTxt").textContent = "Versione app " + ver;
+  $("#ghUpd").disabled = false; $("#ghUpd").textContent = "Controlla aggiornamenti";
   show($("#ghOv")); setTimeout(()=>$(Gh.repo() ? "#gh-token" : "#gh-repo").focus(), 40);
+}
+async function ghCheckUpdate(){
+  const b = $("#ghUpd"); b.disabled = true; b.textContent = "Controllo…";
+  try{
+    const reg = "serviceWorker" in navigator && await navigator.serviceWorker.getRegistration();
+    if(!reg){ b.textContent = "Aggiornamenti non disponibili su questo browser"; return; }
+    await reg.update();
+    const nw = reg.installing || reg.waiting;
+    if(!nw){ b.textContent = "È già l'ultima versione"; return; }
+    b.textContent = "Nuova versione trovata: aggiorno…";
+    const done = ()=>{ if(Gh.busy()){ setTimeout(done, 1000); return; } location.reload(); };
+    if(nw.state === "activated") done(); else nw.addEventListener("statechange", ()=>{ if(nw.state === "activated") done(); });
+  }catch(e){ b.disabled = false; b.textContent = navigator.onLine === false ? "Sei offline: riprova con la connessione" : "Controllo non riuscito: riprova"; }
 }
 let ghAllowPublic = false;
 function ghWire(){
+  $("#ghUpd").addEventListener("click", ghCheckUpdate);
   $("#ghForm").addEventListener("submit", async e=>{
     e.preventDefault();
     const go = $("#ghGo"); go.disabled = true; $("#ghErr").textContent = "Controllo il collegamento…";
