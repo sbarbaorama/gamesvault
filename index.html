@@ -1187,7 +1187,10 @@ async function ghTrack(){
   }
 }
 function ghSearchError(e){
-  if(e.status===403) return "Il token non può avviare la ricerca: serve il permesso Actions in lettura e scrittura.";
+  if(e.status===403){
+    if(/rate limit/i.test(e.message||"")) return "GitHub chiede di rallentare: riprova tra qualche minuto.";
+    return "Il token non può avviare la ricerca: nelle impostazioni del token serve Actions: Read and write." + (e.message && !/not accessible by/i.test(e.message) ? " (GitHub: " + e.message + ")" : "");
+  }
   if(e.status===404) return "Non trovo l'azione di ricerca nel repository dei dati (.github/workflows/cerca-copertine.yml), oppure le Actions sono disattivate.";
   if(e.status===0) return "Sei offline: la ricerca richiede la connessione.";
   return "Non sono riuscito ad avviare la ricerca: riprova.";
