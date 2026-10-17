@@ -1,5 +1,5 @@
 // Service worker: the app opens fast and works offline (the data comes from GitHub, cached by the page).
-const CACHE = "libreria-app-2026-10-17-1";
+const CACHE = "libreria-app-2026-10-17-2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "vendor/xlsx.full.min.js", "vendor/jszip.min.js",
   "icons/icon-192.png", "icons/icon-512.png", "icons/maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });

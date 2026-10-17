@@ -481,7 +481,6 @@ async function saveUpd(){ const v=$("#f-upd").value; if(!v) return; const [y,m,d
   catch{ toast("Non sono riuscito a salvare la data: riprova"); } }
 $("#updSave").addEventListener("click",saveUpd);
 $("#f-upd").addEventListener("keydown",e=>{ if(e.key==="Enter") saveUpd(); if(e.key==="Escape"){ e.stopPropagation(); $("#updCancel").click(); } });
-async function touchUpdate(source){ try{ await S.db.doc("meta/info").set({ ...(S.info||{}), lastUpdate:new Date().toISOString(), lastSource:source }); }catch{} }
 
 /* ---------- import: Excel or game_vault package ---------- */
 const STORE_MAP = [[/steam/,"steam"],[/epic/,"epic"],[/gog/,"gog"],[/amazon|prime/,"amazon"],[/\bea\b|origin|electronic arts/,"ea"]];
@@ -577,7 +576,6 @@ $("#impBody").addEventListener("click", async e=>{
     }catch(err){ failed++; }
     tick();
   }
-  await touchUpdate(zip ? "pacchetto" : "excel");
   IMP.running=false; hide($("#impOv"));
   const imgNote = IMP.noImages ? " Spazio per le immagini esaurito: alcune copertine non sono state caricate." : "";
   toast((failed ? `Importati ${done-failed} giochi, ${failed} non riusciti: riprova.` : `Importati ${done} giochi.`) + imgNote);
@@ -632,7 +630,6 @@ $("#detailBody").addEventListener("click", async e=>{
   if(e.target.closest("[data-yes]")){
     try{
       await S.db.doc("games/"+g.id).delete();
-      touchUpdate("manuale");
       hide($("#detailOv")); toast("Gioco eliminato");
       for(const id of [g.cover,...(g.shots||[])].filter(Boolean)) S.assets?.delete(id).catch(()=>{});
     }catch(err){ toast("Eliminazione non riuscita: riprova"); }
@@ -746,7 +743,6 @@ $("#edForm").addEventListener("submit", async e=>{
   try{
     const ref = E.game ? S.db.doc("games/"+E.game.id) : S.db.collection("games").doc();
     await ref.set(data);
-    touchUpdate("manuale");
     const kept = new Set([data.cover,...data.shots]);
     const before = E.game ? [E.game.cover,...(E.game.shots||[])] : [];
     for(const id of [...before,...E.fresh]) if(id && !kept.has(id)) S.assets?.delete(id).catch(()=>{});
