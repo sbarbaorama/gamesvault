@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="libreria-mode" content="github">
+<meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1219" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Libreria Giochi">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,'Segoe UI',sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Libreria Giochi PC</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a game-library shelf — toolbar of platform chips over a grid of 2:3 box-art covers; detail and editor open as overlays. */
+:root{
+  --bg:#eef0f4; --surface:#ffffff; --sunken:#e2e5ec; --fg:#161a24; --muted:#5b6274; --line:#cdd2dd;
+  --accent:#c2410c; --accent-fg:#ffffff; --danger:#b42318; --ok:#147a4a;
+  --steam:#1d3b63; --epic:#2b2b30; --amazon:#d9770b; --gog:#6a2bb3; --ea:#c2203a;
+  --shadow:0 1px 2px rgba(20,24,40,.08),0 8px 24px rgba(20,24,40,.08);
+  --f-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1219; --surface:#181c26; --sunken:#11141c; --fg:#e7eaf2; --muted:#9097a8; --line:#2a303d;
+  --accent:#ff8a4c; --accent-fg:#1a0c04; --danger:#ff6b5e; --ok:#4cd39a;
+  --steam:#3d6ea8; --epic:#5a5a66; --amazon:#f0941f; --gog:#9a5cf0; --ea:#e5485f;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1219; --surface:#181c26; --sunken:#11141c; --fg:#e7eaf2; --muted:#9097a8; --line:#2a303d;
+  --accent:#ff8a4c; --accent-fg:#1a0c04; --danger:#ff6b5e; --ok:#4cd39a;
+  --steam:#3d6ea8; --epic:#5a5a66; --amazon:#f0941f; --gog:#9a5cf0; --ea:#e5485f;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body.locked{overflow:hidden}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto}
+
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding-block:28px 18px;border-bottom:1px solid var(--line)}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.05;margin:0;letter-spacing:.01em;text-wrap:balance}
+.brand p{margin:6px 0 0;color:var(--muted);font-family:var(--f-mono);font-size:.8rem;letter-spacing:.04em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:.92rem}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.danger{color:var(--danger)}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;padding-block:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px 5px 6px;cursor:pointer;font-size:.88rem;font-weight:700}
+.chip.all{padding-left:12px}
+.chip[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.chip .n{font-family:var(--f-mono);font-weight:400;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+.search{flex:0 1 260px;min-width:0;position:relative}
+.search input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 12px 8px 34px}
+.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+.sort{display:flex;flex-wrap:wrap;gap:4px;font-size:.85rem;color:var(--muted);align-items:center}
+.sort button{border:0;background:none;cursor:pointer;padding:4px 6px;border-radius:6px;color:var(--muted);font-weight:700}
+.sort button[aria-pressed="true"]{color:var(--fg);background:var(--sunken)}
+
+/* platform badge — original monogram tiles, one colour per store */
+.pf{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;color:#fff;font-family:var(--f-display);font-weight:700;font-size:.72rem;letter-spacing:.02em;flex:none;line-height:1}
+.pf.lg{width:36px;height:36px;font-size:.95rem;border-radius:9px}
+.pf.steam{background:var(--steam)} .pf.epic{background:var(--epic)} .pf.amazon{background:var(--amazon)} .pf.gog{background:var(--gog)} .pf.ea{background:var(--ea)}
+.pf.gog{font-size:.62rem} .pf.lg.gog{font-size:.8rem}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:22px 18px}
+@media (max-width:480px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px}}
+.card{display:flex;flex-direction:column;gap:8px;border:0;background:none;padding:0;text-align:left;cursor:pointer;min-width:0;content-visibility:auto;contain-intrinsic-size:auto 300px}
+.cover{position:relative;aspect-ratio:2/3;max-width:100%;width:100%;border-radius:var(--r);overflow:hidden;background:var(--sunken);box-shadow:var(--shadow);transition:transform .18s ease,box-shadow .18s ease}
+.card:hover .cover,.card:focus-visible .cover{transform:translateY(-3px)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .pf{position:absolute;top:8px;left:8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.cover .tag{position:absolute;bottom:8px;right:8px;font-family:var(--f-mono);font-size:.68rem;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:4px;letter-spacing:.03em}
+.card .t{font-weight:700;font-size:.95rem;line-height:1.25;overflow-wrap:anywhere}
+.card .meta{color:var(--muted);font-size:.8rem;margin-top:-4px;display:flex;justify-content:space-between;gap:6px}
+.card .meta b{font-family:var(--f-mono);font-weight:600;color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
+.card .meta b.free{color:var(--ok)}
+.stats{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end}
+.stat .k{font-family:var(--f-mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.stat .v{font-family:var(--f-display);font-weight:700;font-size:1.5rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat.big .v{font-size:clamp(1.8rem,4.5vw,2.5rem);color:var(--accent)}
+.hdr-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn[aria-pressed="true"]{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.money{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:14px 18px;margin-top:16px}
+.money .spend{padding:0;flex:1 1 320px;min-width:0}
+.updated{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);letter-spacing:.04em;margin-top:4px;font-variant-numeric:tabular-nums}
+.chip.nocover{border-style:dashed}
+.updated{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.linkbtn{border:0;background:none;padding:2px 0;color:var(--accent);cursor:pointer;font:inherit;text-decoration:underline;text-underline-offset:2px}
+.updform{display:inline-flex;align-items:center;gap:8px}
+.updform input{font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;padding:2px 6px}
+.field input[type=password]{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 12px;font-size:1rem}
+@media (max-width:520px){
+  header.top{gap:12px;padding-block:20px 14px}
+  .stats{gap:6px 22px}
+  .stat .v{font-size:1.25rem}
+  .hdr-actions{gap:6px}
+  .hdr-actions .btn{padding:7px 11px;font-size:.84rem;gap:6px}
+  .hdr-actions .btn svg{width:15px;height:15px}
+  .toolbar{gap:10px 12px;padding-block:12px}
+  .chip{font-size:.82rem;padding:4px 10px 4px 5px}
+  .chip .pf{width:22px;height:22px;font-size:.62rem}
+}
+.savestate{font-family:var(--f-mono);font-size:.72rem;color:var(--accent);letter-spacing:.04em}
+.ghhelp{font-size:.88rem;color:var(--muted);margin:0}
+.ghhelp a{color:var(--accent)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.imp-list{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin:0;padding:6px 0;list-style:none;font-size:.9rem}
+.imp-list li{display:flex;gap:10px;align-items:center;padding:4px 12px}
+.imp-list li span.t{flex:1;min-width:0;overflow-wrap:anywhere}
+.imp-list li b{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums}
+.imp-body{padding:20px;display:grid;gap:14px}
+.imp-body p{margin:0}
+.progress{height:8px;border-radius:99px;background:var(--sunken);overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+.spend{display:flex;flex-wrap:wrap;gap:6px 16px;padding-block:12px 0;font-size:.82rem;color:var(--muted)}
+.spend span{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.spend b{font-family:var(--f-mono);color:var(--fg);font-weight:600}
+.spend .pf{width:18px;height:18px;font-size:.55rem;border-radius:5px}
+.spend .pf.gog{font-size:.48rem}
+dl.facts{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 18px;margin:18px 0 0}
+dl.facts dt{color:var(--muted);font-size:.85rem}
+dl.facts dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+dl.facts dd.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+
+/* generated cover when no image exists */
+.gen{position:absolute;inset:0;display:flex;align-items:flex-end;padding:14px;color:#fff;font-family:var(--f-display);font-weight:700;font-size:1.15rem;line-height:1.1;text-wrap:balance;overflow-wrap:anywhere}
+.gen::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px);pointer-events:none}
+.gen span{position:relative;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.spr{position:absolute;inset:0;background-repeat:no-repeat}
+.lb .lbbox{position:relative;width:min(100%,calc((100vh - 120px)*16/9),1280px);aspect-ratio:16/9;max-width:100%;border-radius:6px;overflow:hidden;background:#000}
+.lb .lbbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:0}
+
+.empty{border:1.5px dashed var(--line);border-radius:14px;padding:48px 20px;text-align:center;color:var(--muted)}
+.empty h2{font-family:var(--f-display);color:var(--fg);margin:0 0 6px;font-size:1.3rem}
+.empty p{margin:0 auto 16px;max-width:46ch}
+.notice{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 14px;color:var(--muted);font-size:.9rem;margin-block:12px}
+
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(8,10,16,.62);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:max(24px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.sheet{background:var(--surface);border-radius:14px;width:100%;max-width:900px;box-shadow:0 20px 60px rgba(0,0,0,.4);overflow:hidden}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.sheet-head h2{margin:0;font-family:var(--f-display);font-size:1.15rem}
+.x{border:0;background:var(--sunken);width:34px;height:34px;border-radius:8px;cursor:pointer;display:grid;place-items:center;flex:none}
+.x svg{width:18px;height:18px}
+
+.detail{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;padding:22px}
+@media (max-width:640px){.detail{grid-template-columns:1fr}.detail .cover{max-width:220px}}
+.detail h3{font-family:var(--f-display);font-size:clamp(1.4rem,3vw,1.9rem);margin:0 0 10px;line-height:1.1;text-wrap:balance;overflow-wrap:anywhere}
+.store{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:6px 14px 6px 6px;font-weight:700}
+.store small{display:block;font-weight:400;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;line-height:1.2}
+.label{font-family:var(--f-mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 8px}
+.shots{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.shot{aspect-ratio:16/9;max-width:100%;border-radius:8px;overflow:hidden;background:var(--sunken);border:0;padding:0;cursor:zoom-in;position:relative}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;align-items:center}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.9rem;color:var(--danger)}
+
+/* editor */
+form.ed{padding:20px;display:grid;gap:18px}
+.field label.l{display:block;font-weight:700;margin-bottom:6px}
+.field input[type=text],.field input[type=number]{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:10px 12px;font-size:1rem}
+.pfpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.pfpick input{position:absolute;opacity:0;pointer-events:none}
+.pfpick label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;font-weight:700;background:var(--bg)}
+.pfpick input:checked+label{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.pfpick input:focus-visible+label{outline:2px solid var(--accent);outline-offset:2px}
+.edcols{display:grid;grid-template-columns:200px minmax(0,1fr);gap:20px}
+@media (max-width:640px){.edcols{grid-template-columns:1fr}}
+.drop{border:1.5px dashed var(--line);border-radius:10px;background:var(--bg);display:grid;place-items:center;text-align:center;color:var(--muted);font-size:.85rem;padding:12px;cursor:pointer;position:relative;overflow:hidden}
+.drop.over{border-color:var(--accent);color:var(--fg)}
+.drop.cov{aspect-ratio:2/3;max-width:200px;width:100%}
+.drop.cov img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.drop input{display:none}
+.hint{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);margin-top:6px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:8px}
+.thumb{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:8px;overflow:hidden;background:var(--sunken)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .rm,.drop .rm{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:6px;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;display:grid;place-items:center;z-index:2}
+.thumb .rm svg,.drop .rm svg{width:14px;height:14px}
+.thumb.busy::after,.drop.busy::after{content:"Caricamento…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;font-size:.8rem}
+.err{color:var(--danger);font-size:.9rem;min-height:1.2em}
+.edfoot{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:16px}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:60;background:rgba(4,5,8,.92);display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;display:grid;place-items:center}
+.lb .nav svg{width:22px;height:22px}
+.lb .prev{left:max(12px,env(safe-area-inset-left,0px))} .lb .next{right:max(12px,env(safe-area-inset-right,0px))}
+.lb .close{position:absolute;top:max(12px,env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));background:rgba(255,255,255,.14);color:#fff}
+.lb .count{position:absolute;bottom:max(14px,env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);color:#ddd;font-family:var(--f-mono);font-size:.8rem}
+
+.toast{position:fixed;left:50%;bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 12px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:8px;font-weight:700;font-size:.9rem;z-index:70;box-shadow:var(--shadow)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Libreria Giochi PC</h1>
+      <p id="summary">Caricamento della libreria…</p>
+      <div class="updated"><span id="updated">Ultimo aggiornamento: —</span>
+        <span id="saveState" class="savestate" hidden aria-live="polite"></span>
+        <button class="linkbtn" type="button" id="updEdit" hidden>modifica</button>
+        <span id="updForm" class="updform" hidden><label class="sr" for="f-upd">Data ultimo aggiornamento</label><input type="date" id="f-upd"><button class="linkbtn" type="button" id="updSave">salva</button><button class="linkbtn" type="button" id="updCancel">annulla</button></span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">Giochi</div><div class="v" id="totGames">—</div></div>
+      <div class="stat"><div class="k">Gratuiti</div><div class="v" id="totFree">—</div></div>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn" id="moneyBtn" type="button" aria-pressed="false" aria-controls="money">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span>Mostra spesa</span>
+      </button>
+      <button class="btn" id="importBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v3h16v-3"/></svg>
+        Importa
+      </button>
+      <input type="file" id="f-import" accept=".xlsx,.xls,.csv,.zip" hidden>
+      <button class="btn primary" id="addBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Aggiungi gioco
+      </button>
+    </div>
+  </header>
+
+  <section class="money" id="money" hidden aria-label="Spesa">
+    <div class="stat big"><div class="k">Totale speso</div><div class="v" id="totSpent">—</div></div>
+    <div class="spend" id="spend" aria-label="Spesa per piattaforma"></div>
+  </section>
+  <div class="toolbar">
+    <div class="chips" id="chips" role="group" aria-label="Filtra per piattaforma"></div>
+    <div class="sort" role="group" aria-label="Ordina">
+      <span>Ordina:</span>
+      <button type="button" data-sort="title" aria-pressed="true">A–Z</button>
+      <button type="button" data-sort="recent" aria-pressed="false">Recenti</button>
+      <button type="button" data-sort="price" aria-pressed="false">Prezzo</button>
+      <button type="button" data-sort="year" aria-pressed="false">Anno</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Cerca titolo, genere, publisher" aria-label="Cerca" autocomplete="off">
+    </div>
+  </div>
+
+  <div id="notice" class="notice" hidden></div>
+  <main id="grid" class="grid" aria-live="polite"></main>
+  <div id="empty" class="empty" hidden></div>
+</div>
+
+<!-- detail -->
+<div class="overlay" id="detailOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+    <div class="sheet-head"><h2>Scheda gioco</h2>
+      <button class="x" type="button" data-close aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="detail" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- editor -->
+<div class="overlay" id="editOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="eTitle">
+    <div class="sheet-head"><h2 id="eTitle">Nuovo gioco</h2>
+      <button class="x" type="button" id="edX" aria-label="Annulla"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <form class="ed" id="edForm" novalidate>
+      <div class="field">
+        <label class="l" for="f-title">Titolo</label>
+        <input type="text" id="f-title" maxlength="140" placeholder="Es. The Witcher 3: Wild Hunt" autocomplete="off">
+      </div>
+      <div class="field">
+        <span class="l" style="display:block;font-weight:700;margin-bottom:6px">Piattaforma di acquisto</span>
+        <div class="pfpick" id="pfpick" role="radiogroup" aria-label="Piattaforma di acquisto"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label class="l" for="f-price">Prezzo pagato (€)</label><input type="text" inputmode="decimal" id="f-price" placeholder="Lascia vuoto se non lo sai" autocomplete="off"></div>
+        <div class="field"><label class="l" for="f-year">Anno di uscita</label><input type="number" id="f-year" min="1970" max="2100" placeholder="Es. 2015"></div>
+        <div class="field"><label class="l" for="f-genre">Genere</label><input type="text" id="f-genre" maxlength="120" placeholder="Es. Azione, GDR" autocomplete="off"></div>
+        <div class="field"><label class="l" for="f-dev">Sviluppatore</label><input type="text" id="f-dev" maxlength="120" autocomplete="off"></div>
+        <div class="field"><label class="l" for="f-pub">Publisher</label><input type="text" id="f-pub" maxlength="120" autocomplete="off"></div>
+      </div>
+      <div class="edcols">
+        <div class="field">
+          <span class="l" style="display:block;font-weight:700;margin-bottom:6px">Copertina</span>
+          <div class="drop cov" id="coverDrop" tabindex="0" role="button" aria-label="Carica la copertina">
+            <span id="coverPh">Trascina qui l'immagine<br>o tocca per sceglierla</span>
+            <input type="file" id="f-cover" accept="image/*">
+          </div>
+          <div class="hint">Formato verticale, ideale 600×900</div>
+        </div>
+        <div class="field" style="min-width:0">
+          <span class="l" style="display:block;font-weight:700;margin-bottom:6px">Immagini del gioco</span>
+          <div class="drop" id="shotsDrop" tabindex="0" role="button" aria-label="Aggiungi immagini del gioco" style="min-height:84px">
+            <span>Trascina qui gli screenshot, incollali con Ctrl+V<br>o tocca per sceglierli (anche più di uno)</span>
+            <input type="file" id="f-shots" accept="image/*" multiple>
+          </div>
+          <div class="thumbs" id="thumbs"></div>
+          <div class="hint">Formato orizzontale 16:9 · ridimensionate a 1920 px</div>
+        </div>
+      </div>
+      <div class="err" id="edErr" role="alert"></div>
+      <div class="edfoot">
+        <button class="btn ghost" type="button" id="edCancel">Annulla</button>
+        <button class="btn primary" type="submit" id="edSave">Salva gioco</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- import -->
+<div class="overlay" id="impOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="impTitle" style="max-width:640px">
+    <div class="sheet-head"><h2 id="impTitle">Importa da Excel</h2>
+      <button class="x" type="button" id="impX" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="imp-body" id="impBody"></div>
+  </div>
+</div>
+
+<!-- GitHub connection -->
+<div class="overlay" id="ghOv" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ghTitle" style="max-width:560px">
+    <div class="sheet-head"><h2 id="ghTitle">Collega la libreria</h2>
+      <button class="x" type="button" id="ghX" aria-label="Chiudi" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <form class="ed" id="ghForm" novalidate>
+      <p class="ghhelp" id="ghMsg"></p>
+      <div class="field"><label class="l" for="gh-repo">Repository dei dati</label>
+        <input type="text" id="gh-repo" placeholder="nomeutente/libreria-giochi-dati" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label class="l" for="gh-token">Token di accesso</label>
+        <input type="password" id="gh-token" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <p class="hint">Crealo su <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener" style="color:var(--accent)">GitHub → Fine-grained token</a>: accesso solo a questo repository, permessi Contents e Actions in lettura e scrittura.</p></div>
+      <div class="err" id="ghErr" role="alert"></div>
+      <div class="edfoot"><button class="btn danger ghost" type="button" id="ghLogout" hidden>Scollega questo dispositivo</button><button class="btn primary" type="submit" id="ghGo">Collega</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- lightbox -->
+<div class="lb" id="lb" hidden>
+  <div class="lbbox" id="lbBox"></div>
+  <button class="nav prev" type="button" id="lbPrev" aria-label="Immagine precedente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg></button>
+  <button class="nav next" type="button" id="lbNext" aria-label="Immagine successiva"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg></button>
+  <button class="x close" type="button" id="lbClose" aria-label="Chiudi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <div class="count" id="lbCount"></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script>
+const PLATFORMS = {
+  steam:  { name:"Steam",            mono:"ST",  kind:"Client e negozio" },
+  epic:   { name:"Epic Games Store", mono:"EG",  kind:"Negozio digitale" },
+  amazon: { name:"Amazon Games",     mono:"AM",  kind:"Prime Gaming" },
+  gog:    { name:"GOG",              mono:"GOG", kind:"Senza DRM" },
+  ea:     { name:"EA app",           mono:"EA",  kind:"Electronic Arts" }
+};
+const ORDER = ["steam","epic","gog","amazon","ea"];
+const EUR = new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"});
+const NUM = new Intl.NumberFormat("it-IT");
+const hasPrice = g => typeof g.price==="number" && isFinite(g.price);
+const priceTxt = g => !hasPrice(g) ? "—" : g.price===0 ? "Gratis" : EUR.format(g.price);
+const S = { games:[], filter:"all", noCover:false, info:null, q:"", sort:"title", canEdit:false, db:null, assets:null, loaded:false, openId:null };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PIXEL = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+const MODE = (document.querySelector('meta[name="libreria-mode"]')||{}).content || "";
+const GH = MODE === "github";
+const src = id => GH ? "gh:id:" + id : "/_blob/" + encodeURIComponent(id);
+function imgSrc(u){ return /^gh:/.test(u) ? `src="${PIXEL}" data-gh="${esc(u)}"` : `src="${esc(u)}"`; }
+const X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+
+function badge(p, lg){ const P = PLATFORMS[p]; if(!P) return ""; return `<span class="pf ${p}${lg?" lg":""}" aria-hidden="true">${P.mono}</span>`; }
+function hash(s){ let h=0; for(const c of s) h=(h*31+c.charCodeAt(0))|0; return Math.abs(h); }
+function genCover(title){
+  const h = hash(title||"?"), a = h % 360, b = (a + 40 + (h>>3)%60) % 360;
+  return `<div class="gen" style="background:linear-gradient(160deg,hsl(${a} 55% 38%),hsl(${b} 60% 18%))"><span>${esc(title)}</span></div>`;
+}
+function norm(t){ return String(t||"").toLowerCase().replace(/&/g,"and").replace(/[™®©]/g,"").replace(/[^a-z0-9 ]+/g," ").replace(/\s+/g," ").trim(); }
+function M(g){ return (S.meta && S.meta[norm(g.title)]) || {}; }
+function info(g){ const m=M(g); const pick=k=>(g[k]!==null && g[k]!==undefined && g[k]!=="") ? g[k] : (m[k]??null);
+  return { genre:pick("genre"), year:pick("year"), developer:pick("developer"), publisher:pick("publisher"), appid:g.steamAppId||m.appid||null }; }
+function sprite(kind, ref){
+  const [cols,rows] = S.mcfg[kind], [sheet,i] = ref, c=i%cols, r=Math.floor(i/cols);
+  const file = `media/${kind==="cover"?"c":"s"}${sheet}.webp`;
+  return `<div class="spr" aria-hidden="true" ${GH ? `data-ghbg="${file}"` : ""} style="${GH ? "" : `background-image:url(${file});`}background-size:${cols*100}% ${rows*100}%;background-position:${cols>1?c/(cols-1)*100:0}% ${rows>1?r/(rows-1)*100:0}%"></div>`;
+}
+function shotList(g){ return [...(g.shots||[]).map(id=>({url:src(id)})), ...((M(g).s)||[]).map(ref=>({spr:ref}))]; }
+function shotHTML(x){ return x.url ? `<img ${imgSrc(x.url)} alt="" loading="lazy">` : sprite("shot", x.spr); }
+function coverSrc(g){ return g.cover ? src(g.cover) : g.coverPath ? g.coverPath : null; }
+function coverHTML(g){ const u=coverSrc(g), m=M(g); return genCover(g.title) + (!u && m.c && S.mcfg ? sprite("cover", m.c) : "") + (u ? `<img ${imgSrc(u)} alt="Copertina di ${esc(g.title)}" loading="lazy" style="position:absolute;inset:0" onerror="this.style.display='none'">` : ""); }
+
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2400); }
+
+/* ---------- list ---------- */
+function hasCover(g){ return !!(g.cover || g.coverPath || M(g).c); }
+function visible(){
+  const q = S.q.trim().toLowerCase();
+  let list = S.games.filter(g => (S.filter==="all" || g.platform===S.filter) && (!S.noCover || !hasCover(g)) && (!q || (()=>{const I=info(g);return [g.title,I.genre,I.publisher,I.developer];})().some(v=>v && String(v).toLowerCase().includes(q))));
+  const byT=(a,b)=>a.title.localeCompare(b.title,"it",{sensitivity:"base"});
+  if(S.sort==="title") list.sort(byT);
+  else if(S.sort==="price") list.sort((a,b)=>(hasPrice(b)?b.price:-1)-(hasPrice(a)?a.price:-1)||byT(a,b));
+  else if(S.sort==="year") list.sort((a,b)=>(info(b).year||0)-(info(a).year||0)||byT(a,b));
+  else list.sort((a,b)=>(b.addedAt||0)-(a.addedAt||0)||byT(a,b));
+  return list;
+}
+function renderChips(){
+  const counts = {}; S.games.forEach(g=>counts[g.platform]=(counts[g.platform]||0)+1);
+  $("#chips").innerHTML =
+    `<button type="button" class="chip all" data-f="all" aria-pressed="${S.filter==="all"}">Tutte <span class="n">${S.games.length}</span></button>` +
+    ORDER.map(p=>`<button type="button" class="chip" data-f="${p}" aria-pressed="${S.filter===p}">${badge(p)}${PLATFORMS[p].name} <span class="n">${counts[p]||0}</span></button>`).join("") +
+    `<button type="button" class="chip all nocover" data-nc aria-pressed="${S.noCover}">Senza copertina <span class="n">${S.games.filter(g=>!hasCover(g)).length}</span></button>`;
+}
+function render(){
+  renderChips();
+  const n = S.games.length, real = S.games.filter(g=>!g.example).length;
+  const tot = S.games.reduce((t,g)=>t+(hasPrice(g)?g.price:0),0);
+  const unknown = S.games.filter(g=>!hasPrice(g)).length;
+  $("#totSpent").textContent = S.loaded ? EUR.format(tot) : "—";
+  $("#totGames").textContent = S.loaded ? NUM.format(n) : "—";
+  $("#totFree").textContent = S.loaded ? NUM.format(S.games.filter(g=>g.price===0).length) : "—";
+  $("#summary").textContent = S.loaded ? `Collezione personale${unknown?` · ${unknown} senza prezzo`:""}${real<n?` · ${n-real} di esempio`:""}` : "Caricamento della libreria…";
+  const lu = S.info && S.info.lastUpdate ? new Date(S.info.lastUpdate) : null;
+  $("#updated").textContent = "Ultimo aggiornamento: " + (lu && !isNaN(lu) ? lu.toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}) : "—");
+  const per={}; S.games.forEach(g=>{ if(hasPrice(g)) per[g.platform]=(per[g.platform]||0)+g.price; });
+  $("#spend").innerHTML = S.loaded && n ? ORDER.filter(p=>S.games.some(g=>g.platform===p)).map(p=>`<span>${badge(p)}${PLATFORMS[p].name} <b>${EUR.format(per[p]||0)}</b></span>`).join("") : "";
+  const list = visible(), grid = $("#grid"), empty = $("#empty");
+  grid.innerHTML = list.map(g=>`
+    <button type="button" class="card" data-id="${esc(g.id)}">
+      <div class="cover">${coverHTML(g)}${badge(g.platform)}${g.example?'<span class="tag">ESEMPIO</span>':""}</div>
+      <div class="t">${esc(g.title)}</div>
+      <div class="meta"><span>${esc(PLATFORMS[g.platform]?.name||"")}${info(g).year?` · ${info(g).year}`:""}</span><b class="${g.price===0?"free":""}">${priceTxt(g)}</b></div>
+    </button>`).join("");
+  if(!S.loaded){ empty.hidden=true; return; }
+  if(n===0){
+    empty.hidden=false;
+    empty.innerHTML = `<h2>La libreria è vuota</h2><p>Aggiungi il primo gioco con titolo, copertina, qualche screenshot e la piattaforma dove l'hai comprato.</p>${S.canEdit?'<button class="btn primary" type="button" data-add>Aggiungi il primo gioco</button>':""}`;
+  } else if(!list.length){
+    empty.hidden=false;
+    empty.innerHTML = `<h2>Nessun risultato</h2><p>Nessun gioco corrisponde alla ricerca o al filtro scelto.</p><button class="btn" type="button" data-reset>Mostra tutti</button>`;
+  } else empty.hidden=true;
+}
+$("#chips").addEventListener("click",e=>{ if(e.target.closest("[data-nc]")){ S.noCover=!S.noCover; render(); return; } const b=e.target.closest("[data-f]"); if(!b) return; S.filter=b.dataset.f; render(); });
+document.querySelectorAll("[data-sort]").forEach(b=>b.addEventListener("click",()=>{ S.sort=b.dataset.sort; document.querySelectorAll("[data-sort]").forEach(x=>x.setAttribute("aria-pressed",x===b)); render(); try{localStorage.setItem("lib.sort",S.sort)}catch{} }));
+$("#q").addEventListener("input",e=>{ S.q=e.target.value; render(); });
+$("#grid").addEventListener("click",e=>{ const c=e.target.closest(".card"); if(c) openDetail(c.dataset.id); });
+$("#empty").addEventListener("click",e=>{ if(e.target.closest("[data-add]")) openEditor(null); if(e.target.closest("[data-reset]")){ S.filter="all"; S.noCover=false; S.q=""; $("#q").value=""; render(); } });
+$("#addBtn").addEventListener("click",()=>openEditor(null));
+$("#moneyBtn").addEventListener("click",()=>{ const m=$("#money"), open=m.hidden; m.hidden=!open; $("#moneyBtn").setAttribute("aria-pressed",open); $("#moneyBtn span").textContent = open ? "Nascondi spesa" : "Mostra spesa"; });
+function isoDay(d){ const z=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`; }
+$("#updEdit").addEventListener("click",()=>{ const lu = S.info?.lastUpdate ? new Date(S.info.lastUpdate) : new Date(); $("#f-upd").value = isoDay(isNaN(lu)?new Date():lu); $("#updForm").hidden=false; $("#updEdit").hidden=true; $("#f-upd").focus(); });
+$("#updCancel").addEventListener("click",()=>{ $("#updForm").hidden=true; $("#updEdit").hidden=!S.canEdit; });
+async function saveUpd(){ const v=$("#f-upd").value; if(!v) return; const [y,m,d]=v.split("-").map(Number);
+  try{ await S.db.doc("meta/info").set({ ...(S.info||{}), lastUpdate:new Date(y,m-1,d,12).toISOString(), lastSource:"manuale" }); $("#updForm").hidden=true; $("#updEdit").hidden=!S.canEdit; toast("Data aggiornata"); }
+  catch{ toast("Non sono riuscito a salvare la data: riprova"); } }
+$("#updSave").addEventListener("click",saveUpd);
+$("#f-upd").addEventListener("keydown",e=>{ if(e.key==="Enter") saveUpd(); if(e.key==="Escape"){ e.stopPropagation(); $("#updCancel").click(); } });
+async function touchUpdate(source){ try{ await S.db.doc("meta/info").set({ ...(S.info||{}), lastUpdate:new Date().toISOString(), lastSource:source }); }catch{} }
+
+/* ---------- import: Excel or game_vault package ---------- */
+const STORE_MAP = [[/steam/,"steam"],[/epic/,"epic"],[/gog/,"gog"],[/amazon|prime/,"amazon"],[/\bea\b|origin|electronic arts/,"ea"]];
+function storeOf(v){ const s=String(v||"").toLowerCase().trim(); for(const [re,p] of STORE_MAP) if(re.test(s)) return p; return null; }
+function priceOf(v){ if(v===null||v===undefined||v==="") return null; const n = typeof v==="number" ? v : +String(v).replace(/\s|€/g,"").replace(",","."); return isFinite(n)&&n>=0 ? Math.round(n*100)/100 : null; }
+let IMP = null;
+$("#importBtn").addEventListener("click",()=>$("#f-import").click());
+$("#impX").addEventListener("click",()=>{ if(!IMP?.running) hide($("#impOv")); });
+async function readPackage(f){
+  if(!window.JSZip) throw new Error("Il lettore di pacchetti non si è caricato: ricarica la pagina e riprova.");
+  const zip = await JSZip.loadAsync(f);
+  const mf = zip.file("manifest.json"); if(!mf) throw new Error("Questo .zip non è un pacchetto di game_vault.py (manca manifest.json).");
+  const m = JSON.parse(await mf.async("string"));
+  const rows = (m.games||[]).filter(x=>x && x.title && PLATFORMS[x.platform]).map(x=>({title:String(x.title).trim(), platform:x.platform, price:priceOf(x.price), steam:x.steam||null}));
+  return { zip, rows, skipped:[], created:m.created };
+}
+async function readExcel(f){
+  if(!window.XLSX) throw new Error("Il lettore Excel non si è caricato: ricarica la pagina e riprova.");
+  const wb = XLSX.read(await f.arrayBuffer(), {type:"array"});
+  const raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, raw:true, blankrows:false});
+  const rows = [], skipped = [];
+  raw.forEach((r,i)=>{ const t=String(r[0]??"").trim(); if(!t) return; const p=storeOf(r[1]);
+    if(!p){ if(i>0) skipped.push(t); return; } rows.push({title:t, platform:p, price:priceOf(r[2]), steam:null}); });
+  return { zip:null, rows, skipped };
+}
+$("#f-import").addEventListener("change", async e=>{
+  const f = e.target.files[0]; e.target.value=""; if(!f) return;
+  show($("#impOv")); $("#impBody").innerHTML = "<p>Lettura del file…</p>";
+  try{
+    const pkg = /\.zip$/i.test(f.name) ? await readPackage(f) : await readExcel(f);
+    const have = {}; S.games.forEach(g=>{ const k=norm(g.title)+"|"+g.platform; have[k]=(have[k]||0)+1; });
+    const fresh = pkg.rows.filter(x=>{ const k=norm(x.title)+"|"+x.platform; if(have[k]){ have[k]--; return false; } return true; });
+    const steamBy = {}; pkg.rows.forEach(x=>{ if(x.steam) steamBy[norm(x.title)] = x.steam; });
+    const fill = pkg.zip ? S.games.filter(g=>!hasCover(g) && steamBy[norm(g.title)]?.cover) : [];
+    fresh.forEach(x=>{ if(!x.steam) x.steam = steamBy[norm(x.title)] || null; });
+    const withImg = fresh.filter(x=>x.steam?.cover).length;
+    IMP = { pkg, fresh, fill, steamBy, running:false };
+    const nothing = !fresh.length && !fill.length;
+    $("#impTitle").textContent = pkg.zip ? "Importa pacchetto" : "Importa da Excel";
+    $("#impBody").innerHTML = nothing
+      ? `<p>Tutti i ${NUM.format(pkg.rows.length)} giochi del file sono già in libreria${pkg.zip?" e il pacchetto non ha copertine per i giochi che ne sono senza":""}. Non c'è niente da aggiungere.</p>${pkg.skipped.length?`<p class="hint">${pkg.skipped.length} righe ignorate perché lo store non è riconosciuto.</p>`:""}<div class="edfoot"><button class="btn" type="button" data-cancel>Chiudi</button></div>`
+      : `
+      ${fresh.length?`<p><b>${NUM.format(fresh.length)}</b> giochi nuovi da aggiungere${pkg.zip?`, di cui <b>${NUM.format(withImg)}</b> con copertina, screenshot e dati da Steam`:" con titolo, store e prezzo"}.</p>
+      <ul class="imp-list">${fresh.slice(0,200).map(x=>`<li>${badge(x.platform)}<span class="t">${esc(x.title)}</span>${x.steam?.cover?'<span class="hint">copertina</span>':""}<b>${priceTxt(x)}</b></li>`).join("")}${fresh.length>200?`<li><span class="t">…e altri ${fresh.length-200}</span></li>`:""}</ul>`:""}
+      ${fill.length?`<p><b>${NUM.format(fill.length)}</b> giochi già in libreria senza copertina riceveranno copertina, screenshot e dati mancanti.</p>`:""}
+      ${pkg.skipped.length?`<p class="hint">${pkg.skipped.length} righe ignorate perché lo store non è riconosciuto (Steam, Epic, GOG, Amazon, EA).</p>`:""}
+      ${!pkg.zip?`<p class="hint">Per avere anche copertine e dati, importa il pacchetto .zip creato da game_vault.py invece dell'Excel.</p>`:""}
+      ${pkg.zip && !S.assets?`<p class="err">Il caricamento immagini non è disponibile in questa vista: verranno importati solo i dati.</p>`:""}
+      <div class="progress" hidden><i></i></div>
+      <div class="edfoot"><button class="btn ghost" type="button" data-cancel>Annulla</button><button class="btn primary" type="button" data-go>Importa</button></div>`;
+  }catch(err){ $("#impBody").innerHTML = `<p class="err">${esc(err.message||"Non riesco a leggere questo file. Usa un .xlsx con titolo in A, store in B e prezzo in C, oppure un pacchetto .zip di game_vault.py.")}</p><div class="edfoot"><button class="btn" type="button" data-cancel>Chiudi</button></div>`; }
+});
+async function uploadFrom(zip, path, cache){
+  if(!zip || !path || !S.assets || IMP.noImages) return null;
+  if(cache[path]) return cache[path];
+  const entry = zip.file(path); if(!entry) return null;
+  for(let t=0;t<3;t++){
+    try{ const b = await entry.async("uint8array"); const r = await S.assets.upload(new Blob([b],{type:"image/webp"})); cache[path]=r.id; return r.id; }
+    catch(err){
+      if(err?.code==="rate_limited"){ await new Promise(r=>setTimeout(r,4000*(t+1))); continue; }
+      if(err?.code==="quota_or_state" || err?.code==="not_granted"){ IMP.noImages = err.code; }
+      return null;
+    }
+  }
+  return null;
+}
+function steamFields(st){ return st ? { steamAppId:st.appid||null, genre:st.genre||null, year:st.year||null, developer:st.developer||null, publisher:st.publisher||null } : {}; }
+$("#impBody").addEventListener("click", async e=>{
+  if(e.target.closest("[data-cancel]") && !IMP?.running){ hide($("#impOv")); return; }
+  if(!e.target.closest("[data-go]") || !IMP || IMP.running) return;
+  IMP.running = true; const go=e.target.closest("[data-go]"); go.disabled=true; $("#impBody [data-cancel]").disabled=true;
+  const bar=$("#impBody .progress"); bar.hidden=false;
+  const total = IMP.fresh.length + IMP.fill.length, zip = IMP.pkg.zip, cache = {}, base = Date.now();
+  let done=0, failed=0;
+  const tick=()=>{ done++; bar.firstElementChild.style.width=(done/total*100)+"%"; go.textContent=`Importati ${done} di ${total}`; };
+  for(const x of IMP.fresh){
+    try{
+      const st = x.steam, cover = await uploadFrom(zip, st?.cover, cache), shots = [];
+      for(const pth of (st?.shots||[])){ const id = await uploadFrom(zip, pth, cache); if(id) shots.push(id); }
+      await S.db.collection("games").doc().set({ title:x.title, platform:x.platform, price:x.price, cover:cover||null, shots, example:false, addedAt:base+done,
+        genre:null, year:null, developer:null, publisher:null, ...steamFields(st), source: zip?"pacchetto":"excel" });
+    }catch(err){ failed++; if(err?.code==="resource_exhausted") await new Promise(r=>setTimeout(r,3000)); }
+    tick();
+  }
+  for(const g of IMP.fill){
+    try{
+      const st = IMP.steamBy[norm(g.title)], cover = await uploadFrom(zip, st.cover, cache), shots = [...(g.shots||[])];
+      for(const pth of (st.shots||[])){ const id = await uploadFrom(zip, pth, cache); if(id) shots.push(id); }
+      const patch = { shots, steamAppId: g.steamAppId || st.appid || null };
+      if(cover) patch.cover = cover;
+      for(const k of ["genre","year","developer","publisher"]) if(!g[k] && st[k]) patch[k] = st[k];
+      await S.db.doc("games/"+g.id).update(patch);
+    }catch(err){ failed++; }
+    tick();
+  }
+  await touchUpdate(zip ? "pacchetto" : "excel");
+  IMP.running=false; hide($("#impOv"));
+  const imgNote = IMP.noImages ? " Spazio per le immagini esaurito: alcune copertine non sono state caricate." : "";
+  toast((failed ? `Importati ${done-failed} giochi, ${failed} non riusciti: riprova.` : `Importati ${done} giochi.`) + imgNote);
+});
+try{ const s=localStorage.getItem("lib.sort"); if(["recent","title","price","year"].includes(s)){ S.sort=s; document.querySelectorAll("[data-sort]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.sort===s)); } }catch{}
+
+/* ---------- overlays ---------- */
+function lockScroll(){ document.body.classList.toggle("locked", !$("#detailOv").hidden || !$("#editOv").hidden || !$("#lb").hidden || !$("#impOv").hidden || !$("#ghOv").hidden); }
+function show(el){ el.hidden=false; lockScroll(); }
+function hide(el){ el.hidden=true; lockScroll(); }
+document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("mousedown",e=>{ if(e.target===o){ if(o.id==="editOv") cancelEditor(); else if(o.id==="impOv" && IMP?.running) return; else if(o.id==="ghOv" && !Gh.configured()) return; else hide(o); } }));
+$("#detailOv [data-close]").addEventListener("click",()=>hide($("#detailOv")));
+
+function openDetail(id){
+  const g = S.games.find(x=>x.id===id); if(!g) return;
+  S.openId = id;
+  const P = PLATFORMS[g.platform]||{name:"—",kind:""};
+  const shots = shotList(g), I = info(g);
+  $("#detailBody").innerHTML = `
+    <div class="cover">${coverHTML(g)}</div>
+    <div style="min-width:0">
+      <h3 id="dTitle">${esc(g.title)}</h3>
+      <div class="store">${badge(g.platform,true)}<div><small>Acquistato su</small>${esc(P.name)}</div></div>
+      <dl class="facts">
+        <dt>Prezzo pagato</dt><dd class="num">${priceTxt(g)}</dd>
+        <dt>Genere</dt><dd>${esc(I.genre||"—")}</dd>
+        <dt>Anno</dt><dd class="num">${esc(I.year||"—")}</dd>
+        <dt>Sviluppatore</dt><dd>${esc(I.developer||"—")}</dd>
+        <dt>Publisher</dt><dd>${esc(I.publisher||"—")}</dd>
+        ${I.appid?`<dt>Steam</dt><dd><a href="https://store.steampowered.com/app/${encodeURIComponent(I.appid)}/" target="_blank" rel="noopener" style="color:var(--accent)">Pagina del negozio</a></dd>`:""}
+      </dl>
+      ${g.example?'<p class="hint" style="margin-top:12px">Questo è un gioco di esempio: modificalo o eliminalo quando vuoi.</p>':""}
+      <div class="label">Immagini del gioco · ${shots.length}</div>
+      ${shots.length ? `<div class="shots">${shots.map((s,i)=>`<button type="button" class="shot" data-i="${i}" aria-label="Apri immagine ${i+1}">${shotHTML(s)}</button>`).join("")}</div>`
+                     : `<p style="color:var(--muted);margin:0">Nessuna immagine ancora.${S.canEdit?" Aggiungile con Modifica.":""}</p>`}
+      ${S.canEdit?`<div class="actions" id="dActions">
+        <button class="btn" type="button" data-edit>Modifica</button>
+        <button class="btn danger ghost" type="button" data-del>Elimina</button></div>`:""}
+    </div>`;
+  show($("#detailOv"));
+}
+$("#detailBody").addEventListener("click", async e=>{
+  const g = S.games.find(x=>x.id===S.openId); if(!g) return;
+  const shot = e.target.closest(".shot"); if(shot){ openLB(shotList(g), +shot.dataset.i); return; }
+  if(e.target.closest("[data-edit]")){ hide($("#detailOv")); openEditor(g); return; }
+  if(e.target.closest("[data-del]")){
+    $("#dActions").innerHTML = `<div class="confirm">Eliminare "${esc(g.title)}" e le sue immagini?
+      <button class="btn danger" type="button" data-yes>Elimina definitivamente</button>
+      <button class="btn ghost" type="button" data-no>Annulla</button></div>`; return;
+  }
+  if(e.target.closest("[data-no]")){ openDetail(g.id); return; }
+  if(e.target.closest("[data-yes]")){
+    try{
+      await S.db.doc("games/"+g.id).delete();
+      touchUpdate("manuale");
+      hide($("#detailOv")); toast("Gioco eliminato");
+      for(const id of [g.cover,...(g.shots||[])].filter(Boolean)) S.assets?.delete(id).catch(()=>{});
+    }catch(err){ toast("Eliminazione non riuscita: riprova"); }
+  }
+});
+
+/* ---------- lightbox ---------- */
+const LB = { list:[], i:0 };
+function openLB(list,i){ LB.list=list; LB.i=i; drawLB(); show($("#lb")); }
+function drawLB(){ $("#lbBox").innerHTML = shotHTML(LB.list[LB.i]); $("#lbCount").textContent = `${LB.i+1} / ${LB.list.length}`; const many=LB.list.length>1; $("#lbPrev").hidden=!many; $("#lbNext").hidden=!many; }
+function stepLB(d){ LB.i=(LB.i+d+LB.list.length)%LB.list.length; drawLB(); }
+$("#lbPrev").onclick=()=>stepLB(-1); $("#lbNext").onclick=()=>stepLB(1); $("#lbClose").onclick=()=>hide($("#lb"));
+$("#lb").addEventListener("click",e=>{ if(e.target.id==="lb") hide($("#lb")); });
+document.addEventListener("keydown",e=>{
+  if(!$("#lb").hidden){ if(e.key==="Escape") hide($("#lb")); if(e.key==="ArrowLeft") stepLB(-1); if(e.key==="ArrowRight") stepLB(1); return; }
+  if(e.key==="Escape"){ if(!$("#ghOv").hidden){ if(GH && Gh.configured()) hide($("#ghOv")); } else if(!$("#editOv").hidden) cancelEditor(); else if(!$("#detailOv").hidden) hide($("#detailOv")); }
+});
+
+/* ---------- editor ---------- */
+const E = { game:null, platform:null, cover:null, shots:[], fresh:new Set(), busy:0 };
+$("#pfpick").innerHTML = ORDER.map(p=>`<input type="radio" name="platform" id="p-${p}" value="${p}"><label for="p-${p}">${badge(p,true)}<span>${PLATFORMS[p].name}</span></label>`).join("");
+$("#pfpick").addEventListener("change",e=>{ E.platform=e.target.value; });
+
+function openEditor(g){
+  E.game=g; E.platform=g?.platform||null; E.cover=g?.cover||null; E.shots=[...(g?.shots||[])]; E.fresh=new Set(); E.busy=0;
+  $("#eTitle").textContent = g ? "Modifica gioco" : "Nuovo gioco";
+  $("#f-title").value = g?.title||"";
+  $("#f-price").value = hasPrice(g||{}) ? String(g.price).replace(".",",") : "";
+  const I = g ? info(g) : {};
+  $("#f-year").value = I.year||""; $("#f-genre").value = I.genre||""; $("#f-dev").value = I.developer||""; $("#f-pub").value = I.publisher||"";
+  document.querySelectorAll('#pfpick input').forEach(r=>r.checked = r.value===E.platform);
+  $("#edErr").textContent=""; drawEditor(); show($("#editOv")); setTimeout(()=>$("#f-title").focus(),30);
+}
+function drawEditor(){
+  const cd = $("#coverDrop");
+  cd.querySelectorAll("img,.rm").forEach(n=>n.remove());
+  $("#coverPh").hidden = !!E.cover;
+  if(E.cover){ cd.insertAdjacentHTML("beforeend",`<img ${imgSrc(src(E.cover))} alt="Copertina"><button type="button" class="rm" data-rmcover aria-label="Rimuovi copertina">${X_ICON}</button>`); }
+  $("#thumbs").innerHTML = E.shots.map((s,i)=>`<div class="thumb"><img ${imgSrc(src(s))} alt=""><button type="button" class="rm" data-rm="${i}" aria-label="Rimuovi immagine ${i+1}">${X_ICON}</button></div>`).join("")
+    + Array.from({length:E.busy},()=>'<div class="thumb busy"></div>').join("");
+  $("#edSave").disabled = E.busy>0;
+}
+async function shrink(file,max){
+  if(!/^image\/(jpeg|png|webp|bmp)$/.test(file.type)) return file;
+  try{
+    const bmp = await createImageBitmap(file);
+    const s = Math.min(1, max/Math.max(bmp.width,bmp.height));
+    if(s===1 && file.size<1.5e6) return file;
+    const c = document.createElement("canvas"); c.width=Math.round(bmp.width*s); c.height=Math.round(bmp.height*s);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(b=>r(b||file),"image/webp",.86));
+  }catch{ return file; }
+}
+async function upload(file,max){
+  if(!S.assets) throw {message:"Il caricamento immagini non è disponibile in questa vista."};
+  if(!file.type.startsWith("image/")) throw {message:`"${file.name}" non è un'immagine.`};
+  const r = await S.assets.upload(await shrink(file,max));
+  E.fresh.add(r.id); return r.id;
+}
+function upErr(err){ $("#edErr").textContent = err?.code==="too_large" ? "Immagine troppo grande (massimo 20 MB)." : err?.code==="quota_or_state" ? "Spazio per le immagini esaurito." : (err?.message||"Caricamento non riuscito: riprova."); }
+async function setCover(file){
+  const cd=$("#coverDrop"); cd.classList.add("busy"); E.busy++; drawEditor();
+  try{ E.cover = await upload(file,900); $("#edErr").textContent=""; }catch(err){ upErr(err); }
+  finally{ E.busy--; cd.classList.remove("busy"); drawEditor(); }
+}
+async function addShots(files){
+  files = [...files].filter(f=>f.type.startsWith("image/")); if(!files.length) return;
+  E.busy += files.length; drawEditor();
+  for(const f of files){
+    try{ const id = await upload(f,1920); E.shots.push(id); $("#edErr").textContent=""; }catch(err){ upErr(err); }
+    finally{ E.busy--; drawEditor(); }
+  }
+}
+function wireDrop(el,input,onFiles){
+  el.addEventListener("click",e=>{ if(!e.target.closest(".rm")) input.click(); });
+  el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); input.click(); } });
+  input.addEventListener("change",()=>{ onFiles(input.files); input.value=""; });
+  el.addEventListener("dragover",e=>{ e.preventDefault(); el.classList.add("over"); });
+  el.addEventListener("dragleave",()=>el.classList.remove("over"));
+  el.addEventListener("drop",e=>{ e.preventDefault(); el.classList.remove("over"); onFiles(e.dataTransfer.files); });
+}
+wireDrop($("#coverDrop"),$("#f-cover"),fs=>{ if(fs[0]) setCover(fs[0]); });
+wireDrop($("#shotsDrop"),$("#f-shots"),fs=>addShots(fs));
+$("#coverDrop").addEventListener("click",e=>{ if(e.target.closest("[data-rmcover]")){ e.stopPropagation(); E.cover=null; drawEditor(); } });
+$("#thumbs").addEventListener("click",e=>{ const b=e.target.closest("[data-rm]"); if(b){ E.shots.splice(+b.dataset.rm,1); drawEditor(); } });
+document.addEventListener("paste",e=>{
+  if($("#editOv").hidden) return;
+  const files=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith("image/")); if(!files.length) return;
+  e.preventDefault(); if(!E.cover){ setCover(files.shift()); } addShots(files);
+});
+
+function cancelEditor(){
+  for(const id of E.fresh) S.assets?.delete(id).catch(()=>{});
+  E.fresh.clear(); hide($("#editOv"));
+}
+$("#edCancel").onclick=cancelEditor; $("#edX").onclick=cancelEditor;
+$("#edForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const title = $("#f-title").value.trim();
+  if(!title){ $("#edErr").textContent="Scrivi il titolo del gioco."; $("#f-title").focus(); return; }
+  if(!E.platform){ $("#edErr").textContent="Scegli la piattaforma dove l'hai acquistato."; return; }
+  if(E.busy){ return; }
+  const pr = $("#f-price").value.trim().replace(/\s|€/g,"").replace(",",".");
+  if(pr && !(isFinite(+pr) && +pr>=0)){ $("#edErr").textContent="Il prezzo deve essere un numero, ad esempio 19,99."; $("#f-price").focus(); return; }
+  const yr = $("#f-year").value.trim();
+  const data = { ...(E.game||{}), title, platform:E.platform, cover:E.cover||null, shots:E.shots, example:false, addedAt:E.game?.addedAt||Date.now(),
+    price: pr==="" ? null : Math.round(+pr*100)/100, year: yr ? +yr : null,
+    genre:$("#f-genre").value.trim()||null, developer:$("#f-dev").value.trim()||null, publisher:$("#f-pub").value.trim()||null };
+  delete data.id;
+  $("#edSave").disabled=true;
+  try{
+    const ref = E.game ? S.db.doc("games/"+E.game.id) : S.db.collection("games").doc();
+    await ref.set(data);
+    touchUpdate("manuale");
+    const kept = new Set([data.cover,...data.shots]);
+    const before = E.game ? [E.game.cover,...(E.game.shots||[])] : [];
+    for(const id of [...before,...E.fresh]) if(id && !kept.has(id)) S.assets?.delete(id).catch(()=>{});
+    E.fresh.clear(); hide($("#editOv"));
+    toast(E.game ? "Modifiche salvate" : `"${title}" aggiunto alla libreria`);
+  }catch(err){
+    $("#edErr").textContent = err?.code==="not_granted" ? "Non hai i permessi per modificare questa libreria." : "Salvataggio non riuscito: controlla la connessione e riprova.";
+  }finally{ $("#edSave").disabled=false; }
+});
+
+/* ---------- local mode (server.py on the PC) ---------- */
+const LOCAL = !GH && !window.claude && /^https?:$/.test(location.protocol) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+function LocalDB(){
+  const L = { games:[], info:[] }; let data = { games:{}, info:null }, ver = -1, timer = null;
+  const snapAll = ()=>({ docs: Object.entries(data.games).map(([id,d])=>({ id, exists:true, data:()=>d })) });
+  const emit = ()=>{ L.games.forEach(f=>f(snapAll())); L.info.forEach(f=>f({ exists:!!data.info, data:()=>data.info })); };
+  async function refresh(){ try{ const r = await fetch("/api/all",{cache:"no-store"}); const j = await r.json(); data = { games:j.games||{}, info:j.info||null }; ver = j.version; emit(); }catch(e){} }
+  const soon = ()=>{ clearTimeout(timer); timer = setTimeout(refresh, 200); };
+  async function call(method, path, body){
+    const r = await fetch(path, { method, headers:{ "Content-Type":"application/json" }, body: body===undefined ? undefined : JSON.stringify(body) });
+    if(!r.ok) throw { code:"unavailable", message: await r.text() };
+  }
+  const ref = path => ({ path, id: path.split("/").pop(),
+    set: async d => { await call("PUT", "/api/doc/"+path, d); soon(); },
+    update: async d => { await call("PATCH", "/api/doc/"+path, d); soon(); },
+    delete: async () => { await call("DELETE", "/api/doc/"+path); soon(); },
+    onSnapshot: fn => { if(path==="meta/info"){ L.info.push(fn); if(ver>=0) fn({ exists:!!data.info, data:()=>data.info }); } return ()=>{}; } });
+  const newId = () => "l" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  setInterval(async()=>{ try{ const j = await (await fetch("/api/version",{cache:"no-store"})).json(); if(j.version!==ver) refresh(); onEnrich(j.enrich); }catch(e){ onOffline(); } }, 2000);
+  return { doc: ref, collection: name => ({ doc: id => ref(name+"/"+(id||newId())), onSnapshot: (fn,err) => { L.games.push(fn); refresh(); return ()=>{}; } }) };
+}
+const LocalAssets = {
+  upload: async blob => { const r = await fetch("/api/assets", { method:"POST", headers:{ "Content-Type": blob.type || "image/webp" }, body: blob }); const j = await r.json(); if(!r.ok) throw j; return j; },
+  delete: async id => (await fetch("/api/assets/"+id, { method:"DELETE" })).json(),
+  list: async () => ({ assets:[], usage:{} })
+};
+let enrichWasRunning = false, enrichRunning = false, stopRequested = false;
+function onOffline(){ $("#notice").hidden=false; $("#notice").textContent="Il server locale non risponde: riavvia avvia_libreria.bat e ricarica la pagina."; }
+function onEnrich(e){
+  if(!e) return;
+  const btn = $("#enrichBtn"); if(!btn) return;
+  enrichRunning = !!e.running;
+  if(e.running){
+    enrichWasRunning = true;
+    const stopping = stopRequested || e.stop;
+    btn.disabled = stopping; btn.setAttribute("aria-pressed","true");
+    btn.querySelector("span").textContent = stopping ? "Mi fermo…" : "Ferma ricerca";
+    $("#notice").hidden = false;
+    $("#notice").textContent = stopping
+      ? `Fermo la ricerca dopo il gioco in corso (${e.current||"…"}). Trovate finora ${e.found} copertine.`
+      : `Ricerca copertine: ${e.done} di ${e.total} · trovate ${e.found}${e.current?` · ora: ${e.current}`:""}`;
+  } else {
+    stopRequested = false; btn.disabled = false; btn.setAttribute("aria-pressed","false"); btn.querySelector("span").textContent = "Cerca copertine";
+    if(enrichWasRunning){ enrichWasRunning = false; $("#notice").hidden = true;
+      toast(e.error ? "Ricerca interrotta: " + e.error
+        : e.stopped ? `Ricerca fermata: ${e.found===1?"trovata 1 copertina":`trovate ${e.found} copertine`} controllando ${e.done} ${e.done===1?"gioco":"giochi"} su ${e.total}. Quelle trovate sono salvate.`
+        : `Ricerca finita: trovate ${e.found} copertine su ${e.total} giochi`); }
+  }
+}
+/* ---------- GitHub mode: app on GitHub Pages, data in a private repository ---------- */
+const Gh = (()=>{
+  const KEY = "lib.gh";
+  let cfg = null; try{ cfg = JSON.parse(localStorage.getItem(KEY)||"null"); }catch{}
+  const st = { head:null, tree:{}, idPath:{}, games:{}, info:null, metaSha:null };
+  const L = { games:[], info:[] };
+  const pendingUrl = {}, urlCache = {};
+  let pending = [];           // ops not yet committed (shown immediately, saved in background)
+  let started = false;
+  const API = () => (cfg && cfg.api) || "https://api.github.com";
+  const R = () => `/repos/${cfg.repo}`;
+  const BR = () => encodeURIComponent((cfg && cfg.branch) || "main");
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+  class GhError extends Error{
+    constructor(status, msg){ super(msg||""); this.status = status;
+      this.code = status===401 ? "unauthorized" : status===403 ? "forbidden" : status===404 ? "not_found" : status===0 ? "offline" : "unavailable"; }
+  }
+  async function api(path, opt={}){
+    const h = { "Authorization":"Bearer "+cfg.token, "Accept":"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28", ...(opt.headers||{}) };
+    let body = opt.body;
+    if(body !== undefined && typeof body !== "string"){ body = JSON.stringify(body); h["Content-Type"] = "application/json"; }
+    let r;
+    try{ r = await fetch(API()+path, { method: opt.method||"GET", headers:h, body, cache: opt.cache||"no-cache" }); }
+    catch(e){ throw new GhError(0, "Nessuna connessione con GitHub"); }
+    if(!r.ok){ let m = ""; try{ m = (await r.json()).message || ""; }catch{} throw new GhError(r.status, m); }
+    if(opt.raw) return r;
+    const t = await r.text(); return t ? JSON.parse(t) : null;
+  }
+
+  // at most 6 downloads at a time
+  let active = 0; const waiters = [];
+  async function limited(fn){ if(active >= 6) await new Promise(r=>waiters.push(r)); active++; try{ return await fn(); } finally{ active--; const w = waiters.shift(); if(w) w(); } }
+
+  // file contents cached on the device by git sha (contents never change for a given sha)
+  const CK = k => new URL("__gh/" + k, location.href).href;
+  async function cacheOpen(){ try{ return await caches.open("libreria-gh"); }catch{ return null; } }
+  async function cachePut(sha, data){ const c = await cacheOpen(); if(c) try{ await c.put(CK(sha), new Response(data)); }catch{} }
+  const TYPES = { webp:"image/webp", jpg:"image/jpeg", jpeg:"image/jpeg", png:"image/png", gif:"image/gif", avif:"image/avif", json:"application/json" };
+  async function blob(sha, path){
+    const type = TYPES[(path||"").split(".").pop().toLowerCase()] || "application/octet-stream";
+    const c = await cacheOpen();
+    if(c){ try{ const hit = await c.match(CK(sha)); if(hit) return new Blob([await hit.arrayBuffer()], {type}); }catch{} }
+    const r = await limited(()=>api(`${R()}/git/blobs/${sha}`, { raw:true, headers:{ Accept:"application/vnd.github.raw+json" }, cache:"default" }));
+    const buf = await r.arrayBuffer();
+    if(c) try{ await c.put(CK(sha), new Response(buf)); }catch{}
+    return new Blob([buf], {type});
+  }
+  const text = async (sha, path) => (await blob(sha, path)).text();
+
+  async function gitSha(str){
+    const enc = new TextEncoder(), body = enc.encode(str), head = enc.encode(`blob ${body.length}\0`);
+    const all = new Uint8Array(head.length + body.length); all.set(head); all.set(body, head.length);
+    const d = await crypto.subtle.digest("SHA-1", all);
+    return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join("");
+  }
+  // one game per line: small, readable diffs in the repository history
+  const ser = games => "{\n" + Object.keys(games).sort().map(k=>JSON.stringify(k)+":"+JSON.stringify(games[k])).join(",\n") + "\n}\n";
+  const serInfo = info => JSON.stringify(info, null, 1) + "\n";
+
+  function buildIdx(){ st.idPath = {}; for(const p in st.tree){ const m = /^dati\/img\/([^/]+)\.[a-z0-9]+$/i.exec(p); if(m) st.idPath[m[1]] = p; } }
+  function applyMeta(j){ if(j && j.games){ S.meta = j.games; S.mcfg = { cover:j.cover, shot:j.shot }; } }
+
+  // what the page shows: saved data + changes still being saved
+  function view(){
+    const games = { ...st.games }; let info = st.info;
+    for(const o of pending){
+      if(o.kind==="set") games[o.id] = o.data;
+      else if(o.kind==="update"){ if(games[o.id]) games[o.id] = { ...games[o.id], ...o.data }; }
+      else if(o.kind==="delete") delete games[o.id];
+      else if(o.kind==="info") info = o.data;
+    }
+    return { games, info };
+  }
+  function emit(){
+    const v = view();
+    const snap = { docs: Object.entries(v.games).map(([id,d])=>({ id, exists:true, data:()=>d })) };
+    L.games.forEach(f=>f(snap));
+    L.info.forEach(f=>f({ exists:!!v.info, data:()=>v.info }));
+  }
+  const stateKey = () => "state-" + cfg.repo.replace(/[^A-Za-z0-9_.-]/g,"_");
+  async function saveState(){
+    const c = await cacheOpen(); if(!c) return;
+    try{ await c.put(CK(stateKey()), new Response(JSON.stringify({ head:st.head, tree:st.tree, games:st.games, info:st.info, metaSha:st.metaSha,
+      meta: S.meta ? { games:S.meta, cover:S.mcfg.cover, shot:S.mcfg.shot } : null }))); }catch{}
+  }
+  async function loadState(){
+    const c = await cacheOpen(); if(!c) return false;
+    try{ const r = await c.match(CK(stateKey())); if(!r) return false;
+      const j = await r.json(); Object.assign(st, { head:j.head, tree:j.tree||{}, games:j.games||{}, info:j.info||null, metaSha:j.metaSha||null });
+      applyMeta(j.meta); buildIdx(); emit(); return true; }catch{ return false; }
+  }
+
+  // read the latest version of the repository (cheap when nothing changed)
+  let loading = null;
+  function load(force){
+    if(loading) return loading;
+    loading = (async()=>{
+      try{
+        const ref = await api(`${R()}/git/ref/heads/${BR()}`);
+        const sha = ref.object.sha;
+        if(sha === st.head && !force) return false;
+        const commit = await api(`${R()}/git/commits/${sha}`, { cache:"default" });
+        const tr = await api(`${R()}/git/trees/${commit.tree.sha}?recursive=1`, { cache:"default" });
+        const tree = {}; for(const e of tr.tree) if(e.type==="blob") tree[e.path] = e.sha;
+        const gs = tree["dati/giochi.json"], is = tree["dati/info.json"], ms = tree["media/meta.json"];
+        const games = gs ? JSON.parse(await text(gs, "x.json")) : {};
+        const info = is ? JSON.parse(await text(is, "x.json")) : null;
+        if(ms && ms !== st.metaSha){ applyMeta(JSON.parse(await text(ms, "x.json"))); st.metaSha = ms; }
+        Object.assign(st, { head:sha, tree, games, info }); buildIdx(); emit(); saveState();
+        return true;
+      } finally { loading = null; }
+    })();
+    return loading;
+  }
+
+  // ---- saving: changes are grouped into one commit every half second
+  let queue = [], timer = null, chain = Promise.resolve(), inflight = 0;
+  function enqueue(op){
+    pending.push(op); queue.push(op); emit(); savingUI();
+    clearTimeout(timer);
+    timer = setTimeout(flush, queue.length >= 150 ? 0 : 500);
+    return Promise.resolve();
+  }
+  function flush(){
+    const ops = queue; queue = []; if(!ops.length) return;
+    inflight++; savingUI();
+    chain = chain.then(()=>commitOps(ops)).finally(()=>{ inflight--; savingUI(); });
+  }
+  const busy = () => queue.length > 0 || inflight > 0;
+  function savingUI(){ const el = $("#updated"); if(el) el.dataset.saving = busy() ? "1" : ""; renderSaving(); }
+  async function toB64(b){ const buf = new Uint8Array(await b.arrayBuffer()); let s = ""; for(let i=0;i<buf.length;i+=0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i+0x8000)); return btoa(s); }
+  let lastBlobAt = 0;
+  async function createBlob(b){
+    const wait = 800 - (Date.now() - lastBlobAt); if(wait > 0) await sleep(wait);   // GitHub limits fast uploads
+    lastBlobAt = Date.now();
+    return (await api(`${R()}/git/blobs`, { method:"POST", body:{ content: await toB64(b), encoding:"base64" } })).sha;
+  }
+  function describe(ops){
+    const n = k => ops.filter(o=>o.kind===k).length;
+    const parts = [];
+    if(n("set")) parts.push(`${n("set")} giochi salvati`);
+    if(n("update")) parts.push(`${n("update")} giochi aggiornati`);
+    if(n("delete")) parts.push(`${n("delete")} giochi eliminati`);
+    if(n("file")) parts.push(`${n("file")} immagini`);
+    if(n("info") && !parts.length) parts.push("data di aggiornamento");
+    return (parts.join(", ") || "Modifiche") + " (dall'app)";
+  }
+  async function commitOps(ops){
+    try{
+      for(const f of ops) if(f.kind==="file" && !f.sha) f.sha = await createBlob(f.blob);
+      for(let attempt=0; attempt<6; attempt++){
+        await load();
+        const head = st.head;
+        const games = { ...st.games }; let info = st.info;
+        let gChanged = false, iChanged = false; const entries = [];
+        for(const o of ops){
+          if(o.kind==="set"){ games[o.id] = o.data; gChanged = true; }
+          else if(o.kind==="update"){ if(games[o.id]){ games[o.id] = { ...games[o.id], ...o.data }; gChanged = true; } }
+          else if(o.kind==="delete"){ if(games[o.id]){ delete games[o.id]; gChanged = true; } }
+          else if(o.kind==="info"){ info = o.data; iChanged = true; }
+          else if(o.kind==="file") entries.push({ path:o.path, mode:"100644", type:"blob", sha:o.sha });
+          else if(o.kind==="rmfile"){ if(st.tree[o.path]) entries.push({ path:o.path, mode:"100644", type:"blob", sha:null }); }
+        }
+        const gtxt = gChanged ? ser(games) : null, itxt = iChanged ? serInfo(info) : null;
+        if(gtxt !== null) entries.push({ path:"dati/giochi.json", mode:"100644", type:"blob", content:gtxt });
+        if(itxt !== null) entries.push({ path:"dati/info.json", mode:"100644", type:"blob", content:itxt });
+        if(!entries.length) break;
+        const commit = await api(`${R()}/git/commits/${head}`, { cache:"default" });
+        const tree = await api(`${R()}/git/trees`, { method:"POST", body:{ base_tree:commit.tree.sha, tree:entries } });
+        const nc = await api(`${R()}/git/commits`, { method:"POST", body:{ message:describe(ops), tree:tree.sha, parents:[head] } });
+        try{ await api(`${R()}/git/refs/heads/${BR()}`, { method:"PATCH", body:{ sha:nc.sha, force:false } }); }
+        catch(e){ if(e.status===422 || e.status===409){ await sleep(500*(attempt+1)); continue; } throw e; }   // someone else saved first: retry on top
+        // saved: update the local copy without downloading it again
+        if(gtxt !== null){ const s = await gitSha(gtxt); st.tree["dati/giochi.json"] = s; cachePut(s, gtxt); st.games = games; }
+        if(itxt !== null){ const s = await gitSha(itxt); st.tree["dati/info.json"] = s; cachePut(s, itxt); st.info = info; }
+        for(const o of ops){
+          if(o.kind==="file"){ st.tree[o.path] = o.sha; cachePut(o.sha, o.blob); }
+          if(o.kind==="rmfile") delete st.tree[o.path];
+        }
+        st.head = nc.sha; buildIdx();
+        pending = pending.filter(o=>!ops.includes(o)); emit(); saveState();
+        return;
+      }
+      pending = pending.filter(o=>!ops.includes(o)); emit();
+    }catch(e){
+      pending = pending.filter(o=>!ops.includes(o)); emit();
+      toast(saveError(e));
+      if(e.status===401) openSetup("Il token non è più valido o è scaduto: inseriscine uno nuovo.");
+    }
+  }
+  function saveError(e){
+    if(e.status===0) return "Sei offline: le ultime modifiche non sono state salvate su GitHub.";
+    if(e.status===401) return "Le modifiche non sono state salvate: il token non è più valido.";
+    if(e.status===403) return /rate limit/i.test(e.message) ? "GitHub chiede di rallentare: riprova tra qualche minuto." : "Le modifiche non sono state salvate: il token non ha il permesso di scrittura (Contents: Read and write).";
+    if(e.status===404) return "Le modifiche non sono state salvate: repository non trovato.";
+    return "Non sono riuscito a salvare le modifiche su GitHub: riprova.";
+  }
+
+  const newId = () => "g" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+  const hex32 = () => [...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,"0")).join("");
+  const EXT = { "image/webp":"webp", "image/jpeg":"jpg", "image/png":"png", "image/gif":"gif", "image/avif":"avif" };
+
+  function start(){
+    if(started) return; started = true;
+    loadState().then(had=>{ if(had){ S.loaded = true; render(); } return load(); }).catch(onLoadError);
+    setInterval(()=>{ if(!document.hidden) load().then(()=>clearOffline()).catch(onLoadError); }, 30000);
+    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) load().then(()=>clearOffline()).catch(onLoadError); });
+    window.addEventListener("beforeunload", e=>{ if(busy()){ e.preventDefault(); e.returnValue = ""; } });
+  }
+  const ref = path => ({ path, id: path.split("/").pop(),
+    set: d => path==="meta/info" ? enqueue({ kind:"info", data:d }) : enqueue({ kind:"set", id:path.split("/")[1], data:d }),
+    update: d => path==="meta/info" ? enqueue({ kind:"info", data:{ ...(view().info||{}), ...d } }) : enqueue({ kind:"update", id:path.split("/")[1], data:d }),
+    delete: () => enqueue({ kind:"delete", id:path.split("/")[1] }),
+    onSnapshot: fn => { if(path==="meta/info"){ L.info.push(fn); fn({ exists:!!view().info, data:()=>view().info }); start(); } return ()=>{}; } });
+  const db = { doc: ref, collection: name => ({ doc: id => ref(name+"/"+(id||newId())), onSnapshot: fn => { L.games.push(fn); start(); return ()=>{}; } }) };
+  const assets = {
+    upload: async b => {
+      const id = hex32(), ext = EXT[b.type] || "webp", path = `dati/img/${id}.${ext}`;
+      pendingUrl[id] = URL.createObjectURL(b);
+      enqueue({ kind:"file", path, blob:b, id });
+      return { id, url:pendingUrl[id], sizeBytes:b.size, contentType:b.type };
+    },
+    delete: async id => {
+      const q = queue.findIndex(o=>o.kind==="file" && o.id===id);
+      if(q >= 0){ const o = queue.splice(q,1)[0]; pending = pending.filter(x=>x!==o); return { deleted:true }; }   // never saved: just drop it
+      const pf = pending.find(o=>o.kind==="file" && o.id===id);
+      if(pf){ enqueue({ kind:"rmfile", path:pf.path }); return { deleted:true }; }                               // being saved right now: remove it right after
+      const p = st.idPath[id]; if(p) enqueue({ kind:"rmfile", path:p });
+      return { deleted:!!p };
+    },
+    list: async () => ({ assets:[], usage:{} })
+  };
+  function url(u){
+    if(u.startsWith("gh:id:")){ const id = u.slice(6); if(pendingUrl[id]) return Promise.resolve(pendingUrl[id]); const p = st.idPath[id]; return p ? fileUrl(p) : Promise.resolve(null); }
+    if(u.startsWith("gh:path:")) return fileUrl(u.slice(8));
+    return Promise.resolve(u);
+  }
+  function fileUrl(path){
+    const sha = st.tree[path]; if(!sha) return Promise.resolve(null);
+    if(!urlCache[sha]) urlCache[sha] = blob(sha, path).then(b=>URL.createObjectURL(b)).catch(()=>{ delete urlCache[sha]; return null; });
+    return urlCache[sha];
+  }
+
+  // ---- connection setup
+  function parseRepo(v){ v = String(v||"").trim().replace(/\.git$/,""); const m = /github\.com[/:]([^/\s]+)\/([^/\s?#]+)/i.exec(v); if(m) return m[1]+"/"+m[2]; return /^[\w.-]+\/[\w.-]+$/.test(v) ? v : null; }
+  async function connect(repoInput, token, allowPublic){
+    const repo = parseRepo(repoInput);
+    if(!repo) throw new GhError(-1, "Scrivi il repository come nomeutente/nome-repository.");
+    if(!token) throw new GhError(-1, "Incolla il token di accesso.");
+    const prev = cfg; cfg = { repo, token: token.trim(), branch:"main", api: prev && prev.api };
+    try{
+      const info = await api(`/repos/${repo}`);
+      cfg.branch = info.default_branch || "main";
+      try{ await api(`${R()}/git/ref/heads/${BR()}`); }
+      catch(e){ if(e.status===409 || e.status===404) throw new GhError(-1, "Il repository è vuoto: carica prima la cartella con i dati (vedi le istruzioni)."); throw e; }
+      if(!info.private && !allowPublic) throw new GhError(-2, "Attenzione: questo repository è pubblico, quindi chiunque può vedere i tuoi giochi e i prezzi. Rendilo privato da Settings su GitHub, oppure premi di nuovo per collegarlo comunque.");
+      try{ localStorage.setItem(KEY, JSON.stringify(cfg)); }catch{ throw new GhError(-1, "Questo browser non permette di salvare il collegamento (navigazione privata?)."); }
+      return true;
+    }catch(e){
+      cfg = prev;
+      if(e.status===401) throw new GhError(-1, "Token non valido: controlla di averlo copiato tutto.");
+      if(e.status===404) throw new GhError(-1, "Repository non trovato: controlla il nome e che il token abbia accesso proprio a questo repository.");
+      if(e.status===403) throw new GhError(-1, "Il token non ha i permessi necessari: servono Contents e Actions in lettura e scrittura.");
+      if(e.status===0) throw new GhError(-1, "Nessuna connessione con GitHub: controlla internet e riprova.");
+      throw e;
+    }
+  }
+  async function disconnect(){ try{ localStorage.removeItem(KEY); }catch{} try{ await caches.delete("libreria-gh"); }catch{} }
+
+  // ---- cover search on GitHub Actions
+  const WF = "cerca-copertine.yml";
+  const latestRun = async () => ((await api(`${R()}/actions/workflows/${WF}/runs?per_page=1`)).workflow_runs || [])[0] || null;
+  const startSearch = () => api(`${R()}/actions/workflows/${WF}/dispatches`, { method:"POST", body:{ ref:(cfg.branch||"main") } });
+  const cancelRun = id => api(`${R()}/actions/runs/${id}/cancel`, { method:"POST" });
+
+  return { configured: () => !!(cfg && cfg.repo && cfg.token), repo: () => cfg && cfg.repo, db, assets, url, load, connect, disconnect,
+           latestRun, startSearch, cancelRun, busy, GhError };
+})();
+
+function renderSaving(){
+  const el = $("#saveState"); if(!el) return;
+  el.hidden = !Gh.busy(); el.textContent = "Salvataggio su GitHub…";
+}
+let ghOffline = false;
+function clearOffline(){ if(ghOffline){ ghOffline = false; $("#notice").hidden = true; } }
+function onLoadError(e){
+  if(e && (e.status===401 || e.status===404)){ openSetup(e.status===401 ? "Il token non è più valido o è scaduto: inseriscine uno nuovo." : "Non trovo più il repository dei dati: controlla nome e accesso del token."); return; }
+  S.loaded = true; render();
+  ghOffline = true; $("#notice").hidden = false;
+  $("#notice").textContent = e && e.status===0 ? "Sei offline: vedi l'ultima copia salvata su questo dispositivo. Le modifiche richiedono la connessione."
+                                              : "GitHub non risponde in questo momento: riprovo tra poco.";
+}
+
+// images from the private repository load only when they come near the screen
+if(GH){
+  const fill = el => {
+    if(el.dataset.gh){ const u = el.dataset.gh; Gh.url(u).then(x=>{ if(el.dataset.gh !== u) return; if(x) el.src = x; else el.style.display = "none"; }); }
+    if(el.dataset.ghbg){ const u = el.dataset.ghbg; Gh.url("gh:path:"+u).then(x=>{ if(x && el.dataset.ghbg === u) el.style.backgroundImage = `url("${x}")`; }); }
+  };
+  const io = "IntersectionObserver" in window ? new IntersectionObserver(es=>{ for(const e of es) if(e.isIntersecting){ io.unobserve(e.target); fill(e.target); } }, { rootMargin:"800px" }) : null;
+  new MutationObserver(ms=>{
+    for(const m of ms) for(const n of m.addedNodes){
+      if(n.nodeType !== 1) continue;
+      const els = [...(n.matches("[data-gh],[data-ghbg]") ? [n] : []), ...n.querySelectorAll("[data-gh],[data-ghbg]")];
+      for(const el of els) io ? io.observe(el) : fill(el);
+    }
+  }).observe(document.body, { childList:true, subtree:true });
+}
+
+// ---- setup screen
+function openSetup(msg){
+  $("#ghMsg").textContent = msg || "I tuoi giochi stanno nel repository privato su GitHub. Inserisci il suo nome e il token di accesso: restano salvati solo su questo dispositivo.";
+  $("#gh-repo").value = Gh.repo() || "";
+  $("#gh-token").value = "";
+  $("#ghErr").textContent = ""; ghAllowPublic = false; $("#ghGo").textContent = "Collega";
+  $("#ghLogout").hidden = !Gh.configured(); $("#ghX").hidden = !Gh.configured();
+  show($("#ghOv")); setTimeout(()=>$(Gh.repo() ? "#gh-token" : "#gh-repo").focus(), 40);
+}
+let ghAllowPublic = false;
+function ghWire(){
+  $("#ghForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const go = $("#ghGo"); go.disabled = true; $("#ghErr").textContent = "Controllo il collegamento…";
+    try{ await Gh.connect($("#gh-repo").value, $("#gh-token").value, ghAllowPublic); location.reload(); }
+    catch(err){
+      $("#ghErr").textContent = err.message || "Collegamento non riuscito: riprova.";
+      if(err.status===-2){ ghAllowPublic = true; go.textContent = "Collega comunque"; }
+    }
+    finally{ go.disabled = false; }
+  });
+  $("#ghX").addEventListener("click", ()=>hide($("#ghOv")));
+  $("#ghLogout").addEventListener("click", async()=>{
+    if($("#ghLogout").dataset.confirm !== "1"){ $("#ghLogout").dataset.confirm = "1"; $("#ghLogout").textContent = "Confermi? Tocca di nuovo"; return; }
+    await Gh.disconnect(); location.reload();
+  });
+}
+
+// ---- cover search button (runs on GitHub Actions)
+const ghRun = { id:null, startedAt:0, before:null, stopping:false, timer:null, url:"" };
+const missingCovers = () => S.games.filter(g=>!hasCover(g)).length;
+function ghFound(){ if(ghRun.before == null && S.games.length) ghRun.before = missingCovers(); return ghRun.before == null ? 0 : Math.max(0, ghRun.before - missingCovers()); }
+function ghSearchUI(state, run){
+  const btn = $("#enrichBtn"); if(!btn) return;
+  const span = btn.querySelector("span");
+  if(state === "running"){
+    btn.setAttribute("aria-pressed","true"); btn.disabled = ghRun.stopping;
+    span.textContent = ghRun.stopping ? "Mi fermo…" : "Ferma ricerca";
+    const found = ghFound();
+    const t = run && run.run_started_at ? new Date(run.run_started_at).toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}) : "";
+    $("#notice").hidden = false;
+    $("#notice").innerHTML = (ghRun.stopping ? "Fermo la ricerca: le copertine già trovate restano salvate."
+      : run && run.status === "in_progress" ? `Ricerca copertine in corso su GitHub${t?` dalle ${t}`:""} · trovate finora ${found}. Le copertine compaiono man mano.`
+      : "Ricerca copertine in attesa di partire su GitHub…") + (ghRun.url ? ` <a href="${esc(ghRun.url)}" target="_blank" rel="noopener" style="color:var(--accent)">Dettagli</a>` : "");
+  } else {
+    btn.setAttribute("aria-pressed","false"); btn.disabled = state === "starting"; span.textContent = state === "starting" ? "Avvio…" : "Cerca copertine";
+    if(state !== "starting" && !ghOffline) $("#notice").hidden = true;
+  }
+}
+async function ghTrack(){
+  clearTimeout(ghRun.timer);
+  try{
+    const run = await Gh.latestRun();
+    const fresh = run && (run.id === ghRun.id || Date.parse(run.created_at) >= ghRun.startedAt - 30000);
+    if(run && fresh && run.status !== "completed"){
+      ghRun.id = run.id; ghRun.url = run.html_url || "";
+      await Gh.load().catch(()=>{});
+      ghSearchUI("running", run);
+      ghRun.timer = setTimeout(ghTrack, 10000); return;
+    }
+    if(run && fresh && run.status === "completed" && ghRun.id){
+      await Gh.load(true).catch(()=>{});
+      const found = ghFound();
+      const msg = run.conclusion === "success" ? `Ricerca finita: ${found===1?"trovata 1 copertina":`trovate ${found} copertine`}.`
+        : run.conclusion === "cancelled" ? `Ricerca fermata: ${found===1?"trovata 1 copertina":`trovate ${found} copertine`}, già salvate.`
+        : "La ricerca si è interrotta per un errore: apri i dettagli su GitHub.";
+      ghRun.id = null; ghRun.stopping = false; ghRun.before = null; ghSearchUI("idle"); toast(msg); return;
+    }
+    if(ghRun.startedAt && Date.now() - ghRun.startedAt < 90000){ ghSearchUI("starting"); ghRun.timer = setTimeout(ghTrack, 4000); return; }   // waiting for GitHub to create the run
+    ghRun.startedAt = 0; ghSearchUI("idle");
+  }catch(e){
+    if(ghRun.id || ghRun.startedAt){ ghRun.timer = setTimeout(ghTrack, 15000); }
+  }
+}
+function ghSearchError(e){
+  if(e.status===403) return "Il token non può avviare la ricerca: serve il permesso Actions in lettura e scrittura.";
+  if(e.status===404) return "Non trovo l'azione di ricerca nel repository dei dati (.github/workflows/cerca-copertine.yml), oppure le Actions sono disattivate.";
+  if(e.status===0) return "Sei offline: la ricerca richiede la connessione.";
+  return "Non sono riuscito ad avviare la ricerca: riprova.";
+}
+function ghWireSearch(){
+  $("#enrichBtn").addEventListener("click", async()=>{
+    try{
+      if(ghRun.id){ ghRun.stopping = true; ghSearchUI("running"); await Gh.cancelRun(ghRun.id); ghTrack(); return; }
+      ghRun.before = missingCovers(); ghRun.startedAt = Date.now(); ghRun.id = null; ghRun.stopping = false;
+      ghSearchUI("starting");
+      await Gh.startSearch();
+      ghRun.timer = setTimeout(ghTrack, 3000);
+    }catch(e){ ghRun.startedAt = 0; ghRun.stopping = false; ghSearchUI("idle"); toast(ghSearchError(e)); }
+  });
+  // a search may already be running (started from another device)
+  Gh.latestRun().then(run=>{ if(run && run.status !== "completed"){ ghRun.id = run.id; ghRun.before = null; ghTrack(); } }).catch(()=>{});
+}
+
+const use = name => GH ? Promise.resolve(Gh.configured() ? ({ db: Gh.db, user: { canEdit:()=>true, isOwner:()=>true }, assets: Gh.assets }[name] || null) : null)
+  : LOCAL ? Promise.resolve({ db: LocalDB(), user: { canEdit:()=>true, isOwner:()=>true }, assets: LocalAssets }[name] || null) : (window.claude ? claude.use(name) : Promise.resolve(null));
+const SEARCH_BTN = `<button class="btn" id="enrichBtn" type="button" aria-pressed="false" title="Cerca su Steam e GOG copertina e dati dei giochi che ne sono senza">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8 11h6M11 8v6"/></svg><span>Cerca copertine</span></button>`;
+if(GH){
+  ghWire();
+  $(".hdr-actions").insertAdjacentHTML("afterbegin", `<button class="btn" id="ghSettings" type="button" aria-label="Collegamento a GitHub" title="Collegamento a GitHub">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>`);
+  $("#ghSettings").addEventListener("click", ()=>openSetup("Collegata a " + (Gh.repo()||"—") + ". Per cambiare repository o token inserisci i nuovi dati; per togliere l'accesso da questo dispositivo usa Scollega."));
+  if(Gh.configured()){ $(".hdr-actions").insertAdjacentHTML("afterbegin", SEARCH_BTN); ghWireSearch(); }
+}
+if(LOCAL){
+  document.title = "Libreria Giochi PC (locale)";
+  $(".hdr-actions").insertAdjacentHTML("afterbegin", SEARCH_BTN);
+  $("#enrichBtn").addEventListener("click", async()=>{
+    try{
+      if(enrichRunning){ stopRequested = true; const r = await fetch("/api/enrich/stop",{method:"POST"}); onEnrich(await r.json()); }
+      else { const r = await fetch("/api/enrich",{method:"POST"}); onEnrich(await r.json()); }
+    }catch(e){ onOffline(); }
+  });
+}
+
+/* ---------- boot ---------- */
+render();
+if(!GH) fetch("media/meta.json").then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.games){ S.meta=j.games; S.mcfg={cover:j.cover, shot:j.shot}; render(); if(!$("#detailOv").hidden && S.openId) openDetail(S.openId); } }).catch(()=>{});
+(async()=>{
+  const [db, user, assets] = await Promise.all([use("db"), use("user"), use("assets")]);
+  if(!db && GH){ S.loaded=true; render(); openSetup(); return; }
+  if(!db){
+    S.loaded=true; $("#notice").hidden=false;
+    $("#notice").textContent = location.protocol==="file:" ? "Questa pagina va aperta con avvia_libreria.bat (server locale), non con doppio clic sul file." : "Per vedere la libreria apri questa pagina con il tuo account Claude.";
+    render(); return;
+  }
+  S.db=db; S.assets=assets; S.canEdit = !!(user && user.canEdit());
+  $("#addBtn").hidden = !S.canEdit; $("#importBtn").hidden = !S.canEdit; $("#updEdit").hidden = !S.canEdit;
+  db.doc("meta/info").onSnapshot(snap=>{ S.info = snap.exists ? snap.data() : null; render(); }, ()=>{});
+  if(S.canEdit && !assets){ $("#notice").hidden=false; $("#notice").textContent="Il caricamento delle immagini non è disponibile in questa vista: puoi comunque aggiungere titoli e piattaforme."; }
+  db.collection("games").onSnapshot(snap=>{
+    S.games = snap.docs.map(d=>({ id:d.id, ...d.data() })).filter(g=>g.title);
+    S.loaded=true; render();
+    if(!$("#detailOv").hidden && S.openId){ if(S.games.some(g=>g.id===S.openId)) openDetail(S.openId); else hide($("#detailOv")); }
+  }, err=>{ S.loaded=true; $("#notice").hidden=false; $("#notice").textContent="Non riesco a leggere la libreria in questo momento. Ricarica la pagina tra poco."; render(); });
+})();
+</script>
+
+<script>if("serviceWorker" in navigator) addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</body>
+</html>
