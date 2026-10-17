@@ -1254,6 +1254,21 @@ if(!GH) fetch("media/meta.json").then(r=>r.ok?r.json():null).then(j=>{ if(j&&j.g
 })();
 </script>
 
-<script>if("serviceWorker" in navigator) addEventListener("load", ()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+<script>
+// Updates: look for a new version at start, when the app comes back to the front and every 30 minutes.
+// When one is installed the page reloads by itself, but only when nothing is being saved or edited.
+if("serviceWorker" in navigator) addEventListener("load", ()=>{
+  const hadSW = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.register("sw.js", { updateViaCache:"none" }).then(reg=>{
+    const check = ()=>reg.update().catch(()=>{});
+    document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") check(); });
+    setInterval(check, 30*60*1000);
+  }).catch(()=>{});
+  let pending = false;
+  const idle = ()=> !(typeof Gh!=="undefined" && Gh.busy()) && !document.querySelector(".overlay:not([hidden])");
+  const tryReload = ()=>{ if(!pending) return; if(idle() || document.visibilityState==="hidden"){ if(!(typeof Gh!=="undefined" && Gh.busy())) { pending=false; location.reload(); return; } } setTimeout(tryReload, 3000); };
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{ if(!hadSW) return; pending = true; tryReload(); });
+});
+</script>
 </body>
 </html>
