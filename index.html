@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="libreria-mode" content="github">
-<meta name="libreria-version" content="17/10/2026 · n. 5">
+<meta name="libreria-version" content="24/10/2026 · n. 1">
 <meta name="theme-color" content="#eef0f4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1219" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
@@ -130,6 +130,9 @@ header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:spac
 .ghver{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:2px 12px;margin-top:-6px;font-family:var(--f-mono);font-size:.74rem;color:var(--muted)}
 .ghver button{font:inherit;color:var(--accent);background:none;border:0;padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .ghver button:disabled{color:var(--muted);cursor:default;text-decoration:none}
+.ghinst{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:-8px}
+.ghinst .btn svg{width:17px;height:17px}
+.ghinst .hint{margin:0;flex:1 1 220px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .imp-list{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin:0;padding:6px 0;list-style:none;font-size:.9rem}
 .imp-list li{display:flex;gap:10px;align-items:center;padding:4px 12px}
@@ -360,6 +363,7 @@ form.ed{padding:20px;display:grid;gap:18px}
       <div class="err" id="ghErr" role="alert"></div>
       <div class="edfoot"><button class="btn danger ghost" type="button" id="ghLogout" hidden>Scollega questo dispositivo</button><button class="btn primary" type="submit" id="ghGo">Collega</button></div>
       <div class="ghver" id="ghVer" hidden><span id="ghVerTxt"></span><button type="button" id="ghUpd">Controlla aggiornamenti</button></div>
+      <div class="ghinst" id="ghInst" hidden><button class="btn" type="button" id="ghInstBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M12 7v7m0 0-3-3m3 3 3-3M10 18h4"/></svg>Installa l'app</button><span class="hint" id="ghInstTxt"></span></div>
     </form>
   </div>
 </div>
@@ -421,7 +425,7 @@ function coverSrc(g){ return g.cover ? src(g.cover) : g.coverPath ? g.coverPath 
 function coverHTML(g){ const u=coverSrc(g), m=M(g); return genCover(g.title) + (!u && m.c && S.mcfg ? sprite("cover", m.c) : "") + (u ? `<img ${imgSrc(u)} alt="Copertina di ${esc(g.title)}" loading="lazy" style="position:absolute;inset:0" onerror="this.style.display='none'">` : ""); }
 
 let toastT;
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2400); }
+function toast(msg, ms){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, ms||2400); }
 
 /* ---------- list ---------- */
 function hasCover(g){ return !!(g.cover || g.coverPath || M(g).c); }
@@ -1127,7 +1131,33 @@ function openSetup(msg){
   const ver = (document.querySelector('meta[name="libreria-version"]')||{}).content || "";
   $("#ghVer").hidden = !ver; $("#ghVerTxt").textContent = "Versione app " + ver;
   $("#ghUpd").disabled = false; $("#ghUpd").textContent = "Controlla aggiornamenti";
+  ghInstUI();
   show($("#ghOv")); setTimeout(()=>$(Gh.repo() ? "#gh-token" : "#gh-repo").focus(), 40);
+}
+// Install button: uses the browser's own install prompt when it offers one (Chrome, Edge, Samsung Internet).
+let ghInstEvt = null;
+addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); ghInstEvt = e; if(!$("#ghOv").hidden) ghInstUI(); });
+addEventListener("appinstalled", ()=>{ ghInstEvt = null; if(!$("#ghOv").hidden) ghInstUI(); toast("App installata: la trovi tra le tue app"); });
+const ghStandalone = ()=> matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const ghIOS = ()=> /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function ghInstUI(){
+  if(!GH) return;
+  const box = $("#ghInst"), b = $("#ghInstBtn"), t = $("#ghInstTxt");
+  box.hidden = false;
+  if(ghStandalone()){ b.hidden = true; t.textContent = "✓ Stai usando l'app installata."; return; }
+  b.hidden = false; b.disabled = false;
+  t.textContent = ghInstEvt ? "Aggiunge l'icona tra le app di questo dispositivo."
+    : ghIOS() ? "Su iPhone e iPad: pulsante Condividi di Safari → Aggiungi alla schermata Home."
+    : "Se il pulsante non apre la richiesta: menu del browser → Installa app / Aggiungi a schermata Home.";
+}
+async function ghInstall(){
+  if(ghInstEvt){
+    const ev = ghInstEvt; ghInstEvt = null;
+    ev.prompt();
+    try{ const r = await ev.userChoice; if(r && r.outcome === "dismissed") toast("Installazione annullata"); }catch{}
+    ghInstUI(); return;
+  }
+  toast(ghIOS() ? "In Safari: Condividi → Aggiungi alla schermata Home" : "Usa il menu del browser: “Installa app” o “Aggiungi a schermata Home”", 5000);
 }
 async function ghCheckUpdate(){
   const b = $("#ghUpd"); b.disabled = true; b.textContent = "Controllo…";
@@ -1145,6 +1175,7 @@ async function ghCheckUpdate(){
 let ghAllowPublic = false;
 function ghWire(){
   $("#ghUpd").addEventListener("click", ghCheckUpdate);
+  $("#ghInstBtn").addEventListener("click", ghInstall);
   $("#ghForm").addEventListener("submit", async e=>{
     e.preventDefault();
     const go = $("#ghGo"); go.disabled = true; $("#ghErr").textContent = "Controllo il collegamento…";
